@@ -32,3 +32,4 @@ End-to-end ML project using Python.
 ```bash
 pip install -r requirements.txt
 python app/app.py
+# redeploy 
