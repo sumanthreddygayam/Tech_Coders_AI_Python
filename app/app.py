@@ -1,6 +1,17 @@
 from flask import Flask, render_template, request
+import pickle
+import os
+import numpy as np
 
 app = Flask(__name__)
+
+# Absolute path (important for EC2/Linux)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MODEL_PATH = os.path.join(BASE_DIR, "model", "model.pkl")
+
+# Load model once
+with open(MODEL_PATH, "rb") as f:
+    model = pickle.load(f)
 
 @app.route("/")
 def home():
@@ -8,39 +19,43 @@ def home():
 
 @app.route("/predict", methods=["POST"])
 def predict():
-    posted_by = int(request.form["posted_by"])
-    under_construction = int(request.form["under_construction"])
-    rera = int(request.form["rera"])
-    bhk_no = int(request.form["bhk_no"])
-    bhk_or_rk = int(request.form["bhk_or_rk"])
-    square_ft = float(request.form["square_ft"])
-    ready_to_move = int(request.form["ready_to_move"])
-    resale = int(request.form["resale"])
-    longitude = float(request.form["longitude"])
-    latitude = float(request.form["latitude"])
+    try:
+        # Read inputs safely (defaults prevent empty-field crashes)
+        posted_by = int(request.form.get("posted_by", 0))
+        under_construction = int(request.form.get("under_construction", 0))
+        rera = int(request.form.get("rera", 0))
+        bhk_no = int(request.form.get("bhk_no", 0))
+        bhk_or_rk = int(request.form.get("bhk_or_rk", 0))
+        square_ft = float(request.form.get("square_ft", 0))
+        ready_to_move = int(request.form.get("ready_to_move", 0))
+        resale = int(request.form.get("resale", 0))
+        longitude = float(request.form.get("longitude", 0))
+        latitude = float(request.form.get("latitude", 0))
 
-    # 🔒 DETERMINISTIC LOGIC (NO ML)
-    base_price = square_ft * 0.06           # price per sq.ft (lakhs logic)
-    bhk_factor = bhk_no * 5
-    location_factor = (latitude + longitude) % 10
-    rera_bonus = 5 if rera == 1 else 0
-    resale_penalty = -3 if resale == 1 else 0
+        # Feature order MUST match training
+        features = np.array([[
+            posted_by,
+            under_construction,
+            rera,
+            bhk_no,
+            bhk_or_rk,
+            square_ft,
+            ready_to_move,
+            resale,
+            longitude,
+            latitude
+        ]])
 
-    predicted_price = (
-        base_price
-        + bhk_factor
-        + location_factor
-        + rera_bonus
-        + resale_penalty
-    )
+        prediction = model.predict(features)[0]
 
-    # Ensure non-negative
-    predicted_price = max(predicted_price, 10)
+        return render_template(
+            "index.html",
+            prediction=round(float(prediction), 2)
+        )
 
-    return render_template(
-        "index.html",
-        prediction=round(predicted_price, 2)
-    )
+    except Exception as e:
+        # Show error clearly instead of silent 500
+        return f"Prediction Error: {str(e)}", 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
