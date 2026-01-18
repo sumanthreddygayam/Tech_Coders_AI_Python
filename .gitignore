@@ -1,17 +1,21 @@
-# Dataset (DO NOT PUSH)
+# Data
 data/
 *.csv
 
-# Trained models
-models/*.pkl
+# Models
+model/*.pkl
 
 # Jupyter
 .ipynb_checkpoints/
 
-# Python cache
+# Python
 __pycache__/
 *.pyc
 
 # Environment
-venv/
 .env
+venv/
+
+# Ignore real trained models
+model/*.pkl
+!model/sample_model.pkl   # ✅ allow sample model

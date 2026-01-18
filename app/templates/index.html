@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>House Price Prediction</title>
+</head>
+<body>
+
+<h2>House Price Prediction</h2>
+
+<form action="/predict" method="post">
+
+POSTED BY (0=Dealer, 1=Owner):<br>
+<input type="number" name="posted_by" required><br><br>
+
+UNDER CONSTRUCTION (0/1):<br>
+<input type="number" name="under_construction" required><br><br>
+
+RERA REGISTERED (0=No, 1=Yes):<br>
+<input type="number" name="rera" required><br><br>
+
+BHK NO:<br>
+<input type="number" name="bhk_no" required><br><br>
+
+BHK OR RK (0=BHK, 1=RK):<br>
+<input type="number" name="bhk_or_rk" required><br><br>
+
+SQUARE FT:<br>
+<input type="number" step="any" name="square_ft" required><br><br>
+
+READY TO MOVE (0/1):<br>
+<input type="number" name="ready_to_move" required><br><br>
+
+RESALE (0/1):<br>
+<input type="number" name="resale" required><br><br>
+
+LONGITUDE:<br>
+<input type="number" step="any" name="longitude" required><br><br>
+
+LATITUDE:<br>
+<input type="number" step="any" name="latitude" required><br><br>
+
+<button type="submit">Predict Price</button>
+
+</form>
+
+{% if prediction %}
+<h3>Predicted Price: {{ prediction }} Lakhs</h3>
+{% endif %}
+
+</body>
+</html>
