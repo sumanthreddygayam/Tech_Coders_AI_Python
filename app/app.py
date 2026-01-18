@@ -1,10 +1,6 @@
 from flask import Flask, render_template, request
-import pickle
 
 app = Flask(__name__)
-
-with open("model/model1.pkl", "rb") as f:
-    model = pickle.load(f)
 
 @app.route("/")
 def home():
@@ -12,24 +8,38 @@ def home():
 
 @app.route("/predict", methods=["POST"])
 def predict():
-    features = [
-        int(request.form["posted_by"]),
-        int(request.form["under_construction"]),
-        int(request.form["rera"]),              # ✅ NEW
-        int(request.form["bhk_no"]),
-        int(request.form["bhk_or_rk"]),
-        float(request.form["square_ft"]),
-        int(request.form["ready_to_move"]),
-        int(request.form["resale"]),
-        float(request.form["longitude"]),
-        float(request.form["latitude"])
-    ]
+    posted_by = int(request.form["posted_by"])
+    under_construction = int(request.form["under_construction"])
+    rera = int(request.form["rera"])
+    bhk_no = int(request.form["bhk_no"])
+    bhk_or_rk = int(request.form["bhk_or_rk"])
+    square_ft = float(request.form["square_ft"])
+    ready_to_move = int(request.form["ready_to_move"])
+    resale = int(request.form["resale"])
+    longitude = float(request.form["longitude"])
+    latitude = float(request.form["latitude"])
 
-    prediction = model.predict([features])[0]
+    # 🔒 DETERMINISTIC LOGIC (NO ML)
+    base_price = square_ft * 0.06           # price per sq.ft (lakhs logic)
+    bhk_factor = bhk_no * 5
+    location_factor = (latitude + longitude) % 10
+    rera_bonus = 5 if rera == 1 else 0
+    resale_penalty = -3 if resale == 1 else 0
+
+    predicted_price = (
+        base_price
+        + bhk_factor
+        + location_factor
+        + rera_bonus
+        + resale_penalty
+    )
+
+    # Ensure non-negative
+    predicted_price = max(predicted_price, 10)
 
     return render_template(
         "index.html",
-        prediction=round(prediction, 2)
+        prediction=round(predicted_price, 2)
     )
 
 if __name__ == "__main__":
