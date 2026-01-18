@@ -12,7 +12,7 @@ y_dummy = np.random.randint(20, 100, size=50)
 model = DummyRegressor(strategy="mean")
 model.fit(X_dummy, y_dummy)
 
-with open("sample_model.pkl", "wb") as f:
+with open("model1.pkl", "wb") as f:
     pickle.dump(model, f)
 
 print("sample_model.pkl created (5 features, deterministic)")
