@@ -2,20 +2,3 @@
 data/
 *.csv
 
-# Models
-model/*.pkl
-
-# Jupyter
-.ipynb_checkpoints/
-
-# Python
-__pycache__/
-*.pyc
-
-# Environment
-.env
-venv/
-
-# Ignore real trained models
-model/*.pkl
-!model/sample_model.pkl   # ✅ allow sample model
